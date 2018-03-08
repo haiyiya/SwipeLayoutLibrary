@@ -29,16 +29,19 @@ dependencies {
 ```
 
 * 布局内部不限制View个数
-* defaultView：默认View的索引，默认View即主要的View
-* defaultViewWidthRealMatchParent：可填true/false，默认View是否充满布局（如果默认View的位置不为1，仅对默认View使用android:layout_width="match_parent"不能达到预期效果）
-* scrollState：默认的滚动位置，可填left/normal/right
+* defaultView：
+默认View的索引，默认View即主要的View
+* defaultViewWidthRealMatchParent：可填true/false，默认false。
+默认View是否充满布局（如果默认View的位置不为1，仅对默认View使用android:layout_width="match_parent"不能达到预期效果）
+* scrollState：可填left/normal/right，默认normal
+默认的滚动位置
 * 超出屏幕外的控件需要使用固定宽度，否则会不显示
 
 # 状态常量
 ```java
-public static final int SCROLL_STATE_NORMAL = 0;
-public static final int SCROLL_STATE_LEFT = 1;
-public static final int SCROLL_STATE_RIGHT = 2;
+public static final int SCROLL_STATE_NORMAL = 0;// 滚动到默认View
+public static final int SCROLL_STATE_LEFT = 1;// 滚动到默认View左边
+public static final int SCROLL_STATE_RIGHT = 2;// 滚动到默认View右边
 ```
 
 # 方法
