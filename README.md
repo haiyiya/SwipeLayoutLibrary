@@ -1,6 +1,6 @@
 # SwipeLayoutLibrary
 可左右滑动的布局<br>
-![Alt text](https://github.com/haluolym/SwipeLayoutLibrary/blob/master/screenshots/ScreenGif1.gif)
+![Alt text](https://github.com/haluolym/SwipeLayoutLibrary/blob/master/screenshots/screenshot.gif)
 
 # 导入
 Android Studio-New-Import Module
