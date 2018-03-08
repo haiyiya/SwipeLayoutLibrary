@@ -206,7 +206,6 @@ public class SwipeLayout extends LinearLayout {
         if (this.getChildCount() >= 2) {
             int scrollRightMax = getRightScrollMax();
             int scrollLeftMax = getLeftScrollMax();
-
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     lastScrollX = this.getScrollX();
@@ -217,8 +216,8 @@ public class SwipeLayout extends LinearLayout {
                     float moveX = event.getRawX();
                     float moveY = event.getRawY();
 
-                    //横向滑动
-                    if (Math.abs(moveX - downX) > scaledTouchSlop && Math.abs(moveY - downY) <= scaledTouchSlop) {
+                    //横向滑动，一旦确定为横向滑动，标志位toScroll为true，只有在ActionUp才能置false
+                    if (!toScroll&&(Math.abs(moveX - downX) > scaledTouchSlop && Math.abs(moveY - downY) <= scaledTouchSlop)) {
                         if (animator != null && animator.isRunning())
                             animator.cancel();
                         toScroll = true;
