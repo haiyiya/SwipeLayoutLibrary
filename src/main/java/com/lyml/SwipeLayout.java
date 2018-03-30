@@ -27,6 +27,10 @@ public class SwipeLayout extends LinearLayout {
     //滑动事件
     private OnSwipedListener onSwipedListener;
 
+    private boolean toInitScroll=false;
+
+    private int rightScrollMax =0;
+    private int leftScrollMax =0;
     private int scaledTouchSlop;
     private float downX;
     private float downY;
@@ -59,6 +63,7 @@ public class SwipeLayout extends LinearLayout {
                 this.defaultViewWidthRealMatchParent = a.getBoolean(attr, false);
         }
         a.recycle();
+        toInitScroll=true;
     }
 
     public void setOnSwipedListener(OnSwipedListener onSwipedListener) {
@@ -67,6 +72,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * 获得当前状态
+     *
      * @return
      */
     public int getScrollState() {
@@ -75,6 +81,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * 切换到状态
+     *
      * @param scrollState
      */
     public void setScrollState(int scrollState) {
@@ -86,7 +93,7 @@ public class SwipeLayout extends LinearLayout {
         }
         switch (scrollState) {
             case SCROLL_STATE_NORMAL:
-                scrollTo(getLeftScrollMax(), 0);
+                scrollTo(leftScrollMax, 0);
                 this.scrollState = scrollState;
                 break;
             case SCROLL_STATE_LEFT:
@@ -94,7 +101,7 @@ public class SwipeLayout extends LinearLayout {
                 this.scrollState = scrollState;
                 break;
             case SCROLL_STATE_RIGHT:
-                scrollTo(getLeftScrollMax() + getRightScrollMax(), 0);
+                scrollTo(leftScrollMax + rightScrollMax, 0);
                 this.scrollState = scrollState;
                 break;
         }
@@ -102,6 +109,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * 平滑滚动到状态
+     *
      * @param scrollState
      */
     public void smoothScrollToState(int scrollState) {
@@ -113,7 +121,7 @@ public class SwipeLayout extends LinearLayout {
         }
         switch (scrollState) {
             case SCROLL_STATE_NORMAL:
-                animator = ValueAnimator.ofInt(getScrollX(), getLeftScrollMax());
+                animator = ValueAnimator.ofInt(getScrollX(), leftScrollMax);
                 this.scrollState = scrollState;
                 break;
             case SCROLL_STATE_LEFT:
@@ -121,7 +129,7 @@ public class SwipeLayout extends LinearLayout {
                 this.scrollState = scrollState;
                 break;
             case SCROLL_STATE_RIGHT:
-                animator = ValueAnimator.ofInt(getScrollX(), getLeftScrollMax() + getRightScrollMax());
+                animator = ValueAnimator.ofInt(getScrollX(), leftScrollMax + rightScrollMax);
                 this.scrollState = scrollState;
                 break;
         }
@@ -137,6 +145,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * onMeasure前处理defaultView宽度
+     *
      * @param widthMeasureSpec
      * @param heightMeasureSpec
      */
@@ -147,8 +156,8 @@ public class SwipeLayout extends LinearLayout {
             int widthSize = MeasureSpec.getSize(widthMeasureSpec);
             LayoutParams para1;
             para1 = (LayoutParams) getChildAt(defaultView).getLayoutParams();
-            int width= widthSize - para1.leftMargin - para1.rightMargin;
-            if(para1.width!=width) {
+            int width = widthSize - para1.leftMargin - para1.rightMargin;
+            if (para1.width != width) {
                 para1.width = width;
                 getChildAt(defaultView).setLayoutParams(para1);
             }
@@ -158,6 +167,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * onLayout后处理初始滚动位置
+     *
      * @param changed
      * @param l
      * @param t
@@ -167,13 +177,18 @@ public class SwipeLayout extends LinearLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+        rightScrollMax = getRightScrollMax();
+        leftScrollMax = getLeftScrollMax();
         //onDraw之前滚动布局到默认位置
-        scrollTo(getLeftScrollMax(), 0);
-        setScrollState(scrollState);
+        if(toInitScroll) {
+            setScrollState(scrollState);
+            toInitScroll=false;
+        }
     }
 
     /**
      * 在子控件上发生横向滑动时拦截Touch事件
+     *
      * @param event
      * @return
      */
@@ -198,14 +213,13 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * 滚动处理
+     *
      * @param event
      * @return
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (this.getChildCount() >= 2) {
-            int scrollRightMax = getRightScrollMax();
-            int scrollLeftMax = getLeftScrollMax();
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     lastScrollX = this.getScrollX();
@@ -217,7 +231,7 @@ public class SwipeLayout extends LinearLayout {
                     float moveY = event.getRawY();
 
                     //横向滑动，一旦确定为横向滑动，标志位toScroll为true，只有在ActionUp才能置false
-                    if (!toScroll&&(Math.abs(moveX - downX) > scaledTouchSlop && Math.abs(moveY - downY) <= scaledTouchSlop)) {
+                    if (!toScroll && (Math.abs(moveX - downX) > scaledTouchSlop && Math.abs(moveY - downY) <= scaledTouchSlop)) {
                         if (animator != null && animator.isRunning())
                             animator.cancel();
                         toScroll = true;
@@ -234,25 +248,27 @@ public class SwipeLayout extends LinearLayout {
                         float scrollX = lastScrollX - (moveX - downX);
                         if (scrollX < 0)
                             scrollX = 0;
-                        else if (scrollX > scrollLeftMax + scrollRightMax)
-                            scrollX = scrollLeftMax + scrollRightMax;
+                        else if (scrollX > leftScrollMax + rightScrollMax)
+                            scrollX = leftScrollMax + rightScrollMax;
                         scrollTo((int) scrollX, 0);
+
+                        calcOnScrolled();
                     }
                     break;
                 case MotionEvent.ACTION_UP:
                     if (toScroll) {
-                        if (getScrollX() > scrollLeftMax + scrollRightMax / 2) {
-                            animator = ValueAnimator.ofInt(getScrollX(), scrollLeftMax + scrollRightMax);
+                        if (getScrollX() > leftScrollMax + rightScrollMax / 2) {
+                            animator = ValueAnimator.ofInt(getScrollX(), leftScrollMax + rightScrollMax);
                             if (onSwipedListener != null)
                                 onSwipedListener.onSwiped(SCROLL_STATE_RIGHT, scrollState);
                             scrollState = SCROLL_STATE_RIGHT;
-                        } else if (getScrollX() < scrollLeftMax / 2) {
+                        } else if (getScrollX() < leftScrollMax / 2) {
                             animator = ValueAnimator.ofInt(getScrollX(), 0);
                             if (onSwipedListener != null)
                                 onSwipedListener.onSwiped(SCROLL_STATE_LEFT, scrollState);
                             scrollState = SCROLL_STATE_LEFT;
                         } else {
-                            animator = ValueAnimator.ofInt(getScrollX(), scrollLeftMax);
+                            animator = ValueAnimator.ofInt(getScrollX(), leftScrollMax);
                             if (onSwipedListener != null)
                                 onSwipedListener.onSwiped(SCROLL_STATE_NORMAL, scrollState);
                             scrollState = SCROLL_STATE_NORMAL;
@@ -262,6 +278,7 @@ public class SwipeLayout extends LinearLayout {
                             @Override
                             public void onAnimationUpdate(ValueAnimator animation) {
                                 scrollTo((int) animation.getAnimatedValue(), 0);
+                                calcOnScrolled();
                             }
                         });
                         animator.start();
@@ -275,6 +292,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * 默认控件左边的最大可滑动距离，考虑Margins
+     *
      * @return
      */
     private int getLeftScrollMax() {
@@ -288,6 +306,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * 默认控件右边的最大滑动距离，考虑Margin
+     *
      * @return
      */
     private int getRightScrollMax() {
@@ -301,6 +320,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * 当所有控件宽度和小于屏幕时，修正左边的最大可滚动距离
+     *
      * @return
      */
     private int getLeftScrollCorrect() {
@@ -319,6 +339,7 @@ public class SwipeLayout extends LinearLayout {
 
     /**
      * 当所有控件宽度和小于屏幕时和大于屏幕时，修正右边的最大可滚动距离
+     *
      * @return
      */
     private int getRightScrollCorrect() {
@@ -338,7 +359,31 @@ public class SwipeLayout extends LinearLayout {
         return view.getWidth() + lp.leftMargin + lp.rightMargin;
     }
 
+    private void calcOnScrolled(){
+        if (onSwipedListener != null) {
+            int state=-1;
+            float offset=0;
+            int offsetPixels=0;
+            int scroll=getScrollX();
+            if (scroll < leftScrollMax) {
+                state=1;
+                offsetPixels=scroll;
+                offset=(float)offsetPixels/leftScrollMax;
+            } else if (scroll < leftScrollMax + rightScrollMax) {
+                state = 0;
+                offsetPixels=scroll-leftScrollMax;
+                offset=(float)offsetPixels/rightScrollMax;
+            } else {
+                state=2;
+                offsetPixels=0;
+                offset=0;
+            }
+            onSwipedListener.onScrolled(state,offset,offsetPixels);
+        }
+    }
+
     public interface OnSwipedListener {
         void onSwiped(int state, int stateOld);
+        void onScrolled(int state,float stateOffset,int stateOffsetPixels);
     }
 }
