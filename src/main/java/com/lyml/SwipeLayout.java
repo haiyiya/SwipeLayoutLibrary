@@ -184,6 +184,7 @@ public class SwipeLayout extends LinearLayout {
             setScrollState(scrollState);
             toInitScroll=false;
         }
+        calcOnScrolled();
     }
 
     /**
@@ -366,15 +367,15 @@ public class SwipeLayout extends LinearLayout {
             int offsetPixels=0;
             int scroll=getScrollX();
             if (scroll < leftScrollMax) {
-                state=1;
+                state=SCROLL_STATE_LEFT;
                 offsetPixels=scroll;
                 offset=(float)offsetPixels/leftScrollMax;
             } else if (scroll < leftScrollMax + rightScrollMax) {
-                state = 0;
+                state = SCROLL_STATE_NORMAL;
                 offsetPixels=scroll-leftScrollMax;
                 offset=(float)offsetPixels/rightScrollMax;
             } else {
-                state=2;
+                state=SCROLL_STATE_RIGHT;
                 offsetPixels=0;
                 offset=0;
             }
