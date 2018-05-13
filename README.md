@@ -36,7 +36,7 @@ include ':app', ':SwipeLayoutLibrary-master'
 * defaultView：
 默认View的索引，默认View即主要的View
 * defaultViewWidthRealMatchParent：可填true/false，默认false。
-默认View是否充满布局（如果默认View的位置不为1，仅对默认View使用android:layout_width="match_parent"不能达到预期效果）
+默认View是否充满布局（如果默认View的位置不为0，仅对默认View使用android:layout_width="match_parent"不能达到预期效果）
 * scrollState：可填left/normal/right，默认normal
 默认的滚动位置
 * 超出屏幕外的控件需要使用固定宽度，否则会不显示
