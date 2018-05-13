@@ -7,9 +7,13 @@ Android Studio-New-Import Module
 
 # 添加依赖
 ```java
+build.gradle
 dependencies {
     implementation project(':SwipeLayoutLibrary-master')
 }
+
+settings.gradle
+include ':app', ':SwipeLayoutLibrary-master'
 ```
 
 # 布局
