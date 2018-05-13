@@ -74,5 +74,13 @@ public interface OnSwipedListener {
      * @param stateOld 改变前状态
      */
     void onSwiped(int state, int stateOld);
+    
+    /**
+     * 滚动事件
+     * @param state 滚动状态
+     * @param stateOffset 滚动百分比
+     * @param stateOffsetPixels 滚动像素
+     */
+    void onScrolled(int state,float stateOffset,int stateOffsetPixels);
 }
 ```
